@@ -1,5 +1,3 @@
-
-import sys
 import pygame
 from asteroid import Asteroid
 from player import Player
@@ -49,10 +47,9 @@ def main():
             if event.type == pygame.QUIT:
                 run = False
 
+        for sprite in updatable:
+            sprite.update(dt)
         if main_game:
-
-            for sprite in updatable:
-                sprite.update(dt)
             
             for sprite in asteroids:
                 if sprite.check_collision(player):
@@ -67,15 +64,10 @@ def main():
                         sprite.kill()
                         score.score +=1
                     
-            
             pygame.Surface.fill(window, color=(0,0,0))
 
             score.draw(window)
 
-            for sprite in drawable:
-                sprite.draw(window)
-            
-            
 
         else:
             pygame.Surface.fill(window, color=(0,0,0))
@@ -86,13 +78,9 @@ def main():
             final_score_render = font.render(final_score_text, True, "white")
             pygame.surface.Surface.blit(window,got_render,((SCREEN_WIDTH-got_render.get_width())/2,(SCREEN_HEIGHT-got_render.get_height())/2))
             pygame.surface.Surface.blit(window,final_score_render,((SCREEN_WIDTH-final_score_render.get_width())/2,((SCREEN_HEIGHT-final_score_render.get_height())/2)+got_render.get_height()))
-            
 
-            for sprite in updatable:
-                sprite.update(dt)
-            
-            for sprite in drawable:
-                sprite.draw(window)
+        for sprite in drawable:
+                sprite.draw(window)   
 
             
         pygame.display.flip()
