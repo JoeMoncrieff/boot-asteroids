@@ -5,7 +5,8 @@ from constants import *
 from asteroidfield import AsteroidField
 from shot import Shot
 from score import Score
-
+from button import Button
+from controller import Controller
 
 def main():
     pygame.init()
@@ -26,68 +27,89 @@ def main():
     asteroids = pygame.sprite.Group()
     shots = pygame.sprite.Group()
 
-    Player.containers = (updatable,drawable)
-    Asteroid.containers = (updatable,drawable,asteroids)
-    AsteroidField.containers = (updatable)
-    Shot.containers = (updatable,drawable,shots)
+    c = Controller(\
+        updatable=updatable,\
+        drawable=drawable,\
+        asteroids=asteroids,\
+        shots=shots,\
+        )
+    
+    Player.containers = (c.updatable,c.drawable)
+    Asteroid.containers = (c.updatable,c.drawable,c.asteroids)
+    AsteroidField.containers = (c.updatable)
+    Shot.containers = (c.updatable,c.drawable,c.shots)
+    Button.containers = (c.drawable,c.updatable)
 
     #Initializing variables
-    player = Player(SCREEN_WIDTH / 2,SCREEN_HEIGHT / 2)
-    af = AsteroidField()
-    score = Score()
+    c.player = Player(SCREEN_WIDTH / 2,SCREEN_HEIGHT / 2)
+    c.asteroidfield = AsteroidField()
+    c.score = Score()
+    restart_button = None
 
-    #Initializing Game Over text
     font = pygame.font.Font(None,64)
     
-    #Game Loop start here
     run = True
-    main_game = True
+    c.main_game = True
+    
+    #Game Loop start here
     while run:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 run = False
 
-        for sprite in updatable:
+        for sprite in c.updatable:
             sprite.update(dt)
-        if main_game:
+        
+        if c.main_game:
             
-            for sprite in asteroids:
-                if sprite.check_collision(player):
+            for sprite in c.asteroids:
+                if sprite.check_collision(c.player):
                     print("Game Over!")
-                    main_game = False
-                    player.kill()
+                    c.main_game = False
+                    
+                    #Set up code for Game Over Screen
+                    c.player.kill()
+                    restart_button = Button(SCREEN_WIDTH/2 -100,SCREEN_HEIGHT/2 +75,200,100,"Restart?",c,restart_game)
+                    
             
-            for sprite in shots:
-                for ast in asteroids:
+            for sprite in c.shots:
+                for ast in c.asteroids:
                     if sprite.check_collision(ast):
                         ast.split()
                         sprite.kill()
-                        score.score +=1
+                        c.score.score +=1
                     
             pygame.Surface.fill(window, color=(0,0,0))
 
-            score.draw(window)
+            c.score.draw(window)
 
 
         else:
             pygame.Surface.fill(window, color=(0,0,0))
             
             game_over_text = f"Game Over!"
-            final_score_text =  f"Final Score: {score.score}"
+            final_score_text =  f"Final Score: {c.score.score}"
             got_render = font.render(game_over_text,True,"white")
             final_score_render = font.render(final_score_text, True, "white")
             pygame.surface.Surface.blit(window,got_render,((SCREEN_WIDTH-got_render.get_width())/2,(SCREEN_HEIGHT-got_render.get_height())/2))
             pygame.surface.Surface.blit(window,final_score_render,((SCREEN_WIDTH-final_score_render.get_width())/2,((SCREEN_HEIGHT-final_score_render.get_height())/2)+got_render.get_height()))
 
-        for sprite in drawable:
+        for sprite in c.drawable:
                 sprite.draw(window)   
-
-            
+   
         pygame.display.flip()
         pygame.display.update()    
         dt = clock.tick(60)/1000
 
     pygame.quit()
+
+def restart_game(controller):
+    controller.main_game = True
+    for a in controller.asteroids:
+        a.kill()
+    controller.player = Player(SCREEN_WIDTH / 2,SCREEN_HEIGHT / 2)
+    controller.score.score = 0
+    
 
 if __name__ == "__main__":
     main()
