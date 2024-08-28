@@ -1,5 +1,5 @@
 import pygame
-from asteroid import Asteroid
+from asteroid import Asteroid, AsteroidDecoration
 from player import Player
 from constants import *
 from asteroidfield import AsteroidField
@@ -26,19 +26,23 @@ def main():
     drawable = pygame.sprite.Group()
     asteroids = pygame.sprite.Group()
     shots = pygame.sprite.Group()
+    ui_drawable = pygame.sprite.Group()
 
     c = Controller(\
         updatable=updatable,\
         drawable=drawable,\
         asteroids=asteroids,\
         shots=shots,\
+        ui_drawable = ui_drawable
         )
     
     Player.containers = (c.updatable,c.drawable)
     Asteroid.containers = (c.updatable,c.drawable,c.asteroids)
     AsteroidField.containers = (c.updatable)
     Shot.containers = (c.updatable,c.drawable,c.shots)
-    Button.containers = (c.drawable,c.updatable)
+    Button.containers = (c.ui_drawable,c.updatable)
+    Score.containers = (c.ui_drawable)
+    
 
     #Initializing variables
     c.player = Player(SCREEN_WIDTH / 2,SCREEN_HEIGHT / 2)
@@ -60,6 +64,8 @@ def main():
         for sprite in c.updatable:
             sprite.update(dt)
         
+        pygame.Surface.fill(window, color=(0,0,0))
+
         if c.main_game:
             
             for sprite in c.asteroids:
@@ -78,24 +84,26 @@ def main():
                         ast.split()
                         sprite.kill()
                         c.score.score +=1
-                    
-            pygame.Surface.fill(window, color=(0,0,0))
-
-            c.score.draw(window)
-
-
-        else:
-            pygame.Surface.fill(window, color=(0,0,0))
             
+            for sprite in c.drawable:
+                sprite.draw(window)
+                    
+        else:
+
+            for sprite in c.drawable:
+                sprite.draw(window)
+
             game_over_text = f"Game Over!"
             final_score_text =  f"Final Score: {c.score.score}"
             got_render = font.render(game_over_text,True,"white")
             final_score_render = font.render(final_score_text, True, "white")
             pygame.surface.Surface.blit(window,got_render,((SCREEN_WIDTH-got_render.get_width())/2,(SCREEN_HEIGHT-got_render.get_height())/2))
             pygame.surface.Surface.blit(window,final_score_render,((SCREEN_WIDTH-final_score_render.get_width())/2,((SCREEN_HEIGHT-final_score_render.get_height())/2)+got_render.get_height()))
+  
+        
 
-        for sprite in c.drawable:
-                sprite.draw(window)   
+        for sprite in ui_drawable:
+            sprite.draw(window)
    
         pygame.display.flip()
         pygame.display.update()    
