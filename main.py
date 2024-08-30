@@ -70,13 +70,14 @@ def main():
             
             for sprite in c.asteroids:
                 if sprite.check_collision(c.player):
-                    print("Game Over!")
-                    c.main_game = False
-                    
-                    #Set up code for Game Over Screen
-                    c.player.kill()
-                    restart_button = Button(SCREEN_WIDTH/2 -100,SCREEN_HEIGHT/2 +75,200,100,"Restart?",c,restart_game)
-                    
+                    if c.player.check_collision(sprite):
+                        print("Game Over!")
+                        c.main_game = False
+                        
+                        #Set up code for Game Over Screen
+                        c.player.kill()
+                        restart_button = Button(SCREEN_WIDTH/2 -100,SCREEN_HEIGHT/2 +75,200,100,"Restart?",c,restart_game)
+                        
             
             for sprite in c.shots:
                 for ast in c.asteroids:

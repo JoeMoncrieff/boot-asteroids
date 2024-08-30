@@ -52,5 +52,35 @@ class Player(circleshape.CircleShape):
             new_shot.velocity = pygame.Vector2(0,1).rotate(self.rotation) * PLAYER_SHOOT_SPEED
             self.shoot_timer = PLAYER_SHOOT_COOLDOWN
 
-    
-    
+    def check_collision(self, other_circle):
+        triangle_points = self.triangle()
+        line_array = [[triangle_points[0],triangle_points[1]],
+                      [triangle_points[2],triangle_points[0]],
+                      [triangle_points[1],triangle_points[2]]]
+        for line in line_array:
+            # Calc Gradient
+            line = sorted(line,key=lambda x: x.x)
+            gradient = [line[1].x - line[0].x, line[1].y - line[0].y]
+
+            # Calc reverse gradient
+
+            reverse_gradient = [gradient[1],-gradient[0]] if gradient[1] > 0 else [-gradient[1],gradient[0]]
+
+            # Edgecases when x or y == 0
+
+            grad_multiple = ( (other_circle.position.y - line[0].y) * gradient[0] )/( (gradient[1]*reverse_gradient[0]) - (reverse_gradient[1]*gradient[0])) 
+            # Calc shortest point
+            shortest_point = pygame.Vector2(other_circle.position.x + grad_multiple*reverse_gradient[0], other_circle.position.y + grad_multiple*reverse_gradient[1])
+            
+            if  (line[0].x <= shortest_point.x <= line[1].y) and (min(line[0].y,line[1].y) <= shortest_point.y <= max(line[0].y,line[1].y)):
+                return pygame.Vector2.distance_to(shortest_point,other_circle.position) <= other_circle.radius
+            else:
+                dist1 = pygame.Vector2.distance_to(line[0],other_circle.position)
+                dist2 = pygame.Vector2.distance_to(line[1],other_circle.position)
+                return min(dist1,dist2) <= other_circle.radius
+            
+            
+
+            # Check if on line
+            # Else check both end points and see if either are in collision range
+
