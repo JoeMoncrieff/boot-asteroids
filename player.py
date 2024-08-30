@@ -57,6 +57,8 @@ class Player(circleshape.CircleShape):
         line_array = [[triangle_points[0],triangle_points[1]],
                       [triangle_points[2],triangle_points[0]],
                       [triangle_points[1],triangle_points[2]]]
+        
+        is_collided = False
         for line in line_array:
             # Calc Gradient
             line = sorted(line,key=lambda x: x.x)
@@ -73,11 +75,14 @@ class Player(circleshape.CircleShape):
             shortest_point = pygame.Vector2(other_circle.position.x + grad_multiple*reverse_gradient[0], other_circle.position.y + grad_multiple*reverse_gradient[1])
             
             if  (line[0].x <= shortest_point.x <= line[1].y) and (min(line[0].y,line[1].y) <= shortest_point.y <= max(line[0].y,line[1].y)):
-                return pygame.Vector2.distance_to(shortest_point,other_circle.position) <= other_circle.radius
+                is_collided = pygame.Vector2.distance_to(shortest_point,other_circle.position) <= other_circle.radius
             else:
                 dist1 = pygame.Vector2.distance_to(line[0],other_circle.position)
                 dist2 = pygame.Vector2.distance_to(line[1],other_circle.position)
-                return min(dist1,dist2) <= other_circle.radius
+                is_collided = min(dist1,dist2) <= other_circle.radius
+            if is_collided:
+                return True
+        return False
             
             
 
